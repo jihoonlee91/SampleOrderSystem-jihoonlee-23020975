@@ -13,6 +13,11 @@ class ConsoleView:
         print(" [시료 관리]")
         print("[1] 시료 등록   [2] 시료 목록   [3] 시료 검색   [0] 뒤로")
 
+    def show_approval_menu(self) -> None:
+        print("-" * 60)
+        print(" [주문 승인/거절]")
+        print("[1] 승인   [2] 거절   [0] 뒤로")
+
     def prompt(self, message: str) -> str:
         return input(f"{message} > ").strip()
 

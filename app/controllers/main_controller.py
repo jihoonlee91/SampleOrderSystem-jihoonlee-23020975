@@ -5,8 +5,10 @@ from app.controllers.order_controller import (
     SampleNotFoundError,
     InvalidQuantityError,
 )
+from app.controllers.approval_controller import ApprovalController, InvalidOrderStateError
 from app.repositories.sample_repository import SampleRepository
 from app.repositories.order_repository import OrderRepository
+from app.repositories.production_queue_repository import ProductionQueueRepository
 
 
 class MainController:
@@ -15,12 +17,17 @@ class MainController:
     def __init__(self) -> None:
         self.view = ConsoleView()
         self.sample_controller = SampleController(SampleRepository())
-        self.order_controller = OrderController(OrderRepository(), self.sample_controller)
+        order_repository = OrderRepository()
+        self.order_controller = OrderController(order_repository, self.sample_controller)
+        self.approval_controller = ApprovalController(
+            order_repository, self.sample_controller, ProductionQueueRepository()
+        )
 
     def run(self) -> None:
         actions = {
             "1": self._sample_menu,
             "2": self._reserve_order,
+            "3": self._approval_menu,
         }
         while True:
             self.view.show_main_menu()
@@ -77,3 +84,25 @@ class MainController:
             self.view.show_message(str(e))
         except ValueError:
             self.view.show_message("입력 값이 올바르지 않습니다.")
+
+    def _approval_menu(self) -> None:
+        while True:
+            self.view.show_approval_menu()
+            reserved = self.approval_controller.list_reserved()
+            self.view.show_orders(reserved)
+            choice = self.view.prompt("선택")
+            if choice == "0":
+                return
+            elif choice in ("1", "2"):
+                order_id = self.view.prompt("주문번호")
+                try:
+                    if choice == "1":
+                        order = self.approval_controller.approve(order_id)
+                        self.view.show_message(f"승인 완료. 상태: {order['status']}")
+                    else:
+                        order = self.approval_controller.reject(order_id)
+                        self.view.show_message(f"거절 완료. 상태: {order['status']}")
+                except InvalidOrderStateError as e:
+                    self.view.show_message(str(e))
+            else:
+                self.view.show_message("잘못된 선택입니다.")
