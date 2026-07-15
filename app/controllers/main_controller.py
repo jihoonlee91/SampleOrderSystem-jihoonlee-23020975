@@ -1,5 +1,9 @@
 from app.views.console_view import ConsoleView
-from app.controllers.sample_controller import SampleController, DuplicateSampleError
+from app.controllers.sample_controller import (
+    SampleController,
+    DuplicateSampleError,
+    InvalidSampleDataError,
+)
 from app.controllers.order_controller import (
     OrderController,
     SampleNotFoundError,
@@ -79,7 +83,7 @@ class MainController:
             stock = int(self.view.prompt("초기 재고") or 0)
             self.sample_controller.register(sample_id, name, avg_time, yield_rate, stock)
             self.view.show_message(f"시료 '{name}' 등록 완료.")
-        except DuplicateSampleError as e:
+        except (DuplicateSampleError, InvalidSampleDataError) as e:
             self.view.show_message(str(e))
         except ValueError:
             self.view.show_message("입력 값이 올바르지 않습니다.")
