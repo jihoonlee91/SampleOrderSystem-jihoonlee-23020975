@@ -13,7 +13,14 @@
 ```
 python main.py           # 콘솔 앱 실행
 python -m pytest tests/  # 전체 테스트 실행
+python scripts/verify.py # Verify Harness (Test Verify -> Compliance Verify)
 ```
+
+## Verify Harness
+
+Phase 4부터 커밋 전 `python scripts/verify.py`를 실행한다.
+1. Test Verify: pytest 전체 스위트 실행, 실패 시 즉시 중단
+2. Compliance Verify: 설계 문서/PLAN 체크리스트/E2E 수동 검증/작업 보고서 작성 여부를 사람이 최종 확인
 
 ## 문서 구조
 
