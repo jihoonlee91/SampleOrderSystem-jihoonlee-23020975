@@ -52,3 +52,9 @@ def test_search_by_name_keyword():
 
     assert len(results) == 1
     assert results[0]["sample_id"] == "S-001"
+
+
+def test_adjust_stock_returns_false_for_missing_sample():
+    repo = _repo()
+
+    assert repo.adjust_stock("S-NOPE", 10) is False

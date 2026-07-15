@@ -58,3 +58,12 @@ def test_multiple_reservations_auto_number_sequentially():
 
     assert first["order_id"] == "ORD-0001"
     assert second["order_id"] == "ORD-0002"
+
+
+def test_list_all_returns_every_order():
+    sample_controller, order_controller = _setup()
+    sample_controller.register("S-001", "실리콘 웨이퍼-8인치", 0.5, 0.92, 480)
+    order_controller.reserve("S-001", "고객A", 10)
+    order_controller.reserve("S-001", "고객B", 20)
+
+    assert len(order_controller.list_all()) == 2

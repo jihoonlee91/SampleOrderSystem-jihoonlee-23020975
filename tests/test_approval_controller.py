@@ -88,3 +88,15 @@ def test_approve_non_reserved_order_raises_error():
 
     with pytest.raises(InvalidOrderStateError):
         approval_controller.approve(order["order_id"])
+
+
+def test_list_reserved_returns_only_reserved_orders():
+    sample_controller, order_controller, approval_controller = _setup()
+    sample_controller.register("S-001", "실리콘 웨이퍼-8인치", 0.5, 0.92, 480)
+    reserved = order_controller.reserve("S-001", "고객A", 10)
+    confirmed = order_controller.reserve("S-001", "고객B", 10)
+    approval_controller.approve(confirmed["order_id"])
+
+    result = approval_controller.list_reserved()
+
+    assert [o["order_id"] for o in result] == [reserved["order_id"]]
