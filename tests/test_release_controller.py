@@ -69,3 +69,24 @@ def test_release_already_released_order_raises_error():
 
     with pytest.raises(InvalidOrderStateError):
         release_controller.release(order["order_id"])
+
+
+def test_release_producing_order_raises_error():
+    """재고 부족으로 아직 생산 중인(PRODUCING) 주문은 출고할 수 없다."""
+    sample_controller, order_controller, approval_controller, release_controller = _setup()
+    sample_controller.register("S-003", "SiC 파워기판-6인치", 0.8, 0.92, 10)
+    order = order_controller.reserve("S-003", "고객A", 100)
+    approval_controller.approve(order["order_id"])  # 재고 부족 -> PRODUCING
+
+    with pytest.raises(InvalidOrderStateError):
+        release_controller.release(order["order_id"])
+
+
+def test_release_rejected_order_raises_error():
+    sample_controller, order_controller, approval_controller, release_controller = _setup()
+    sample_controller.register("S-001", "실리콘 웨이퍼-8인치", 0.5, 0.92, 480)
+    order = order_controller.reserve("S-001", "고객A", 100)
+    approval_controller.reject(order["order_id"])
+
+    with pytest.raises(InvalidOrderStateError):
+        release_controller.release(order["order_id"])
