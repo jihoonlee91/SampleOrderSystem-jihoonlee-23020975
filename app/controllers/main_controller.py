@@ -1,5 +1,10 @@
 from app.views.console_view import ConsoleView
 from app.controllers.sample_controller import SampleController, DuplicateSampleError
+from app.controllers.order_controller import (
+    OrderController,
+    SampleNotFoundError,
+    InvalidQuantityError,
+)
 from app.repositories.sample_repository import SampleRepository
 from app.repositories.order_repository import OrderRepository
 
@@ -10,11 +15,12 @@ class MainController:
     def __init__(self) -> None:
         self.view = ConsoleView()
         self.sample_controller = SampleController(SampleRepository())
-        self.order_repository = OrderRepository()
+        self.order_controller = OrderController(OrderRepository(), self.sample_controller)
 
     def run(self) -> None:
         actions = {
             "1": self._sample_menu,
+            "2": self._reserve_order,
         }
         while True:
             self.view.show_main_menu()
@@ -54,6 +60,20 @@ class MainController:
             self.sample_controller.register(sample_id, name, avg_time, yield_rate, stock)
             self.view.show_message(f"시료 '{name}' 등록 완료.")
         except DuplicateSampleError as e:
+            self.view.show_message(str(e))
+        except ValueError:
+            self.view.show_message("입력 값이 올바르지 않습니다.")
+
+    def _reserve_order(self) -> None:
+        try:
+            sample_id = self.view.prompt("시료 ID")
+            customer = self.view.prompt("고객명")
+            quantity = int(self.view.prompt("주문 수량"))
+            order = self.order_controller.reserve(sample_id, customer, quantity)
+            self.view.show_message(
+                f"주문 '{order['order_id']}' 접수 완료. (상태: {order['status']})"
+            )
+        except (SampleNotFoundError, InvalidQuantityError) as e:
             self.view.show_message(str(e))
         except ValueError:
             self.view.show_message("입력 값이 올바르지 않습니다.")

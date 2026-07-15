@@ -19,6 +19,17 @@ class ConsoleView:
     def show_message(self, message: str) -> None:
         print(message)
 
+    def show_orders(self, orders: list[dict]) -> None:
+        if not orders:
+            print("등록된 주문이 없습니다.")
+            return
+        print(f"{'주문번호':<14}{'시료ID':<8}{'고객명':<16}{'수량':<8}{'상태'}")
+        for o in orders:
+            print(
+                f"{o['order_id']:<14}{o['sample_id']:<8}"
+                f"{o['customer']:<16}{o['quantity']:<8}{o['status']}"
+            )
+
     def show_samples(self, samples: list[dict]) -> None:
         if not samples:
             print("등록된 시료가 없습니다.")
