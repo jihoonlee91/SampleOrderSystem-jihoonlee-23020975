@@ -7,8 +7,13 @@ class ProductionQueueRepository:
     def __init__(self, file_path: str = "data/production_queue.json"):
         self.store = JsonStore(file_path)
 
-    def enqueue(self, order_id: str, sample_id: str, shortage: int) -> dict:
-        record = {"order_id": order_id, "sample_id": sample_id, "shortage": shortage}
+    def enqueue(self, order_id: str, sample_id: str, shortage: int, quantity: int) -> dict:
+        record = {
+            "order_id": order_id,
+            "sample_id": sample_id,
+            "shortage": shortage,
+            "quantity": quantity,
+        }
         self.store.insert(record)
         return record
 

@@ -134,3 +134,41 @@ docs/PLAN.md의 Phase 4 항목 구현: RESERVED 주문 목록 표시, 승인 시
 - `app/controllers/approval_controller.py` (신규)
 - `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
 - `tests/test_approval_controller.py` (신규)
+
+## Phase 5: 생산 라인
+
+### 요청 받은 작업
+docs/PLAN.md의 Phase 5 항목 구현: 생산 큐 FIFO 처리, 실 생산량/생산 시간 계산, 생산 완료 시
+PRODUCING→CONFIRMED 전환 및 재고 반영, 생산 현황/대기열 조회.
+
+### 해석
+큐 항목에 "부족분(shortage)"뿐 아니라 "주문 수량(quantity)"도 함께 저장하도록 Phase 4의
+`ProductionQueueRepository.enqueue` 시그니처를 확장함(작업 중 발견 — 최초 설계에는 shortage만 저장했으나,
+생산 완료 후 최종 재고 = 기존재고 + 실생산량 - 주문수량으로 계산해야 정확함을 테스트 작성 중 확인하여 즉시 반영).
+
+### 변경 요약
+- `app/repositories/production_queue_repository.py`: `enqueue`에 `quantity` 파라미터 추가 (Phase 4 코드 수정)
+- `app/controllers/approval_controller.py`: enqueue 호출 시 quantity 함께 전달 (Phase 4 코드 수정)
+- `app/controllers/production_controller.py`: FIFO 처리, 실생산량(ceil)/생산시간 계산, 재고 반영, CONFIRMED 전환
+- `app/views/console_view.py`, `main_controller.py`: 생산 라인 메뉴("5") 연결
+
+### TDD 사이클 기록
+- RED: `production_controller` 모듈 부재로 collection error 확인
+- GREEN: 최초 구현 시 재고 계산식이 실제 요구와 달라 테스트 기대값과 불일치 발견 → 계산식을
+  `actual_quantity - shortage`에서 `actual_quantity - quantity`(전체 주문 수량 기준)로 수정하여 통과시킴
+- REVIEW: Verify Harness 실행 - Test Verify 26/26 PASS. 콘솔 실행으로 재고 30 → 생산 후 15로
+  정확히 반영되는 것을 실측 확인 (30 + ceil(170/0.92) - 200 = 15)
+
+### 요청사항 충족 여부 체크리스트
+- [x] 실 생산량 = ceil(부족분 / 수율) 계산
+- [x] 총 생산 시간 = 평균 생산시간 * 실 생산량 계산
+- [x] 생산 완료 시 PRODUCING → CONFIRMED 전환 및 재고 반영
+- [x] FIFO 순서로 대기열 처리
+- [x] 대기열 조회 기능
+- [x] Verify Harness(pytest 26/26 + Compliance 체크) 통과, 콘솔 E2E 검증 완료
+
+### 변경된 파일 목록
+- `app/controllers/production_controller.py` (신규)
+- `app/repositories/production_queue_repository.py`, `app/controllers/approval_controller.py` (수정)
+- `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
+- `tests/test_production_controller.py` (신규)

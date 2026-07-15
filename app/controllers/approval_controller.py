@@ -30,7 +30,7 @@ class ApprovalController:
             self.order_repository.update_status(order_id, OrderStatus.CONFIRMED.value)
         else:
             shortage = quantity - sample["stock"]
-            self.queue_repository.enqueue(order_id, order["sample_id"], shortage)
+            self.queue_repository.enqueue(order_id, order["sample_id"], shortage, quantity)
             self.order_repository.update_status(order_id, OrderStatus.PRODUCING.value)
 
         return self.order_repository.read(order_id)

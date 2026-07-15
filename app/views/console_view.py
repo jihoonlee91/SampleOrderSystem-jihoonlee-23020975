@@ -18,6 +18,29 @@ class ConsoleView:
         print(" [주문 승인/거절]")
         print("[1] 승인   [2] 거절   [0] 뒤로")
 
+    def show_production_menu(self) -> None:
+        print("-" * 60)
+        print(" [생산 라인]")
+        print("[1] 다음 항목 생산 처리   [2] 대기열 조회   [0] 뒤로")
+
+    def show_production_queue(self, queue: list[dict]) -> None:
+        if not queue:
+            print("생산 대기 중인 항목이 없습니다.")
+            return
+        print(f"{'순서':<6}{'주문번호':<14}{'시료ID':<8}{'부족분':<8}{'주문수량'}")
+        for i, entry in enumerate(queue, start=1):
+            print(
+                f"{i:<6}{entry['order_id']:<14}{entry['sample_id']:<8}"
+                f"{entry['shortage']:<8}{entry['quantity']}"
+            )
+
+    def show_production_result(self, result: dict) -> None:
+        print(
+            f"생산 완료 - 주문 {result['order_id']} / 시료 {result['sample_id']} / "
+            f"부족분 {result['shortage']} -> 실생산량 {result['actual_quantity']} "
+            f"(예상 소요 {result['total_time']:.2f}분)"
+        )
+
     def prompt(self, message: str) -> str:
         return input(f"{message} > ").strip()
 
