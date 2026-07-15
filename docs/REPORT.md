@@ -238,3 +238,33 @@ docs/PLAN.md의 Phase 7 항목 구현: CONFIRMED 주문 목록 표시 및 출고
 - `app/controllers/release_controller.py` (신규)
 - `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
 - `tests/test_release_controller.py` (신규)
+
+## Phase 8: 통합 마감
+
+### 요청 받은 작업
+docs/PLAN.md의 Phase 8 항목 구현: 전체 메뉴 연결 점검, 회귀 테스트 전체 재실행, README 정리,
+더미 데이터 시나리오로 E2E 수동 검증.
+
+### 점검 결과
+1. **회귀 테스트**: pytest 33/33 PASS
+2. **전체 생애주기 E2E**: 시료 등록(2건) → 주문(3건) → 승인(재고충분 1건→CONFIRMED, 재고부족
+   1건→PRODUCING) + 거절(1건→REJECTED) → 모니터링(REJECTED 제외 집계 확인) → 생산 처리
+   (실생산량/시간 계산 확인) → 출고(RELEASE 전환) → 모니터링 재확인(RELEASE 건수 갱신 확인)까지
+   전 과정을 콘솔에서 직접 실행하여 검증
+3. **Clean Code 점검**:
+   - Model(순수 데이터)/Repository(CRUD)/Controller(도메인 규칙)/View(입출력) 계층 분리 규칙 위반 없음
+   - `InvalidOrderStateError`가 `app/controllers/errors.py`에 단일 정의되어 3곳에서 일관되게 참조됨
+   - grep으로 미사용 코드/import 없음을 확인
+   - View의 `show_*` 메서드들은 각각 다른 데이터 구조를 출력하므로 무리한 공통 추상화를 하지 않음(Rule of Three 미해당)
+4. **문서 정합성**: PRD.md ↔ FEATURES/*.md ↔ design/phaseN.md ↔ REPORT.md ↔ 실제 코드 간 기능 목록 일치 확인
+5. **README.md**: 실행 방법/기능 목록/예시 UI 화면/프로젝트 구조/문서 링크/개발 프로세스를 최신 상태로 갱신 완료
+
+### 요청사항 충족 여부 체크리스트
+- [x] 전체 메뉴(1~6번) 연결 및 동작 확인
+- [x] 전체 회귀 테스트 PASS (33/33)
+- [x] README 최종 정리
+- [x] 더미 시나리오 기반 E2E 수동 검증 완료
+- [x] Clean Code 점검 완료 (계층 분리, 예외 공통화, 미사용 코드 없음)
+
+### 변경된 파일 목록
+- `docs/PLAN.md`, `docs/REPORT.md` (수정, Phase 8 반영)
