@@ -123,6 +123,7 @@ data/             # 실행 시 자동 생성되는 JSON 데이터 (git 미포함
 - [`docs/PLAN.md`](docs/PLAN.md): Phase별 개발 계획 및 진행 상황(거시적 계획)
 - [`docs/design/`](docs/design/README.md): Phase별 상세 설계 문서(세부 계획)
 - [`docs/REPORT.md`](docs/REPORT.md): Phase별 AI 작업 보고서 (요청/해석/TDD 기록/체크리스트)
+- [`docs/AUDIT.md`](docs/AUDIT.md): 감리 보고서 (커밋 이력/문서-코드 일치/Clean Code/검증 이력 점검)
 - [`CLAUDE.md`](CLAUDE.md): 개발 프로세스 원칙 및 도메인 핵심 규칙
 
 ## 개발 프로세스
