@@ -3,6 +3,12 @@
 가상의 반도체 회사 "S-Semi"의 시료(Sample) 생산과 주문을 관리하는 콘솔 애플리케이션이다.
 Agentic Engineering 방법론(문서 관리, Verify Harness, TDD, Clean Code, Commit 이력)을 적용하여 개발했다.
 
+## 설치
+
+```
+pip install -r requirements.txt   # pytest (테스트 실행 시에만 필요, main.py 실행 자체는 표준 라이브러리만 사용)
+```
+
 ## 실행 방법
 
 ```

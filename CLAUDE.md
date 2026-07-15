@@ -12,7 +12,8 @@
 ## 실행 / 테스트
 
 ```
-python main.py           # 콘솔 앱 실행
+pip install -r requirements.txt  # pytest 설치 (최초 1회, 테스트 실행 시에만 필요)
+python main.py           # 콘솔 앱 실행 (표준 라이브러리만 사용, 설치 불필요)
 python -m pytest tests/  # 전체 테스트 실행
 python scripts/verify.py # Verify Harness (Test Verify -> Compliance Verify)
 ```
