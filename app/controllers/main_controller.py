@@ -7,6 +7,7 @@ from app.controllers.order_controller import (
 )
 from app.controllers.approval_controller import ApprovalController, InvalidOrderStateError
 from app.controllers.production_controller import ProductionController
+from app.controllers.monitoring_controller import MonitoringController
 from app.repositories.sample_repository import SampleRepository
 from app.repositories.order_repository import OrderRepository
 from app.repositories.production_queue_repository import ProductionQueueRepository
@@ -27,12 +28,14 @@ class MainController:
         self.production_controller = ProductionController(
             queue_repository, order_repository, self.sample_controller
         )
+        self.monitoring_controller = MonitoringController(order_repository, self.sample_controller)
 
     def run(self) -> None:
         actions = {
             "1": self._sample_menu,
             "2": self._reserve_order,
             "3": self._approval_menu,
+            "4": self._monitoring_menu,
             "5": self._production_menu,
         }
         while True:
@@ -110,6 +113,19 @@ class MainController:
                         self.view.show_message(f"거절 완료. 상태: {order['status']}")
                 except InvalidOrderStateError as e:
                     self.view.show_message(str(e))
+            else:
+                self.view.show_message("잘못된 선택입니다.")
+
+    def _monitoring_menu(self) -> None:
+        while True:
+            self.view.show_monitoring_menu()
+            choice = self.view.prompt("선택")
+            if choice == "0":
+                return
+            elif choice == "1":
+                self.view.show_order_counts(self.monitoring_controller.order_counts())
+            elif choice == "2":
+                self.view.show_stock_status(self.monitoring_controller.stock_status())
             else:
                 self.view.show_message("잘못된 선택입니다.")
 

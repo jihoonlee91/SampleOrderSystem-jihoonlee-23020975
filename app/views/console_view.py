@@ -18,6 +18,24 @@ class ConsoleView:
         print(" [주문 승인/거절]")
         print("[1] 승인   [2] 거절   [0] 뒤로")
 
+    def show_monitoring_menu(self) -> None:
+        print("-" * 60)
+        print(" [모니터링]")
+        print("[1] 주문량 확인   [2] 재고량 확인   [0] 뒤로")
+
+    def show_order_counts(self, counts: dict) -> None:
+        print("[상태별 주문 현황] (REJECTED 제외)")
+        for status, count in counts.items():
+            print(f"  {status:<12}{count}건")
+
+    def show_stock_status(self, statuses: list[dict]) -> None:
+        if not statuses:
+            print("등록된 시료가 없습니다.")
+            return
+        print(f"{'ID':<8}{'이름':<20}{'재고':<8}{'상태'}")
+        for s in statuses:
+            print(f"{s['sample_id']:<8}{s['name']:<20}{s['stock']:<8}{s['status']}")
+
     def show_production_menu(self) -> None:
         print("-" * 60)
         print(" [생산 라인]")

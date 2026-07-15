@@ -172,3 +172,33 @@ PRODUCING→CONFIRMED 전환 및 재고 반영, 생산 현황/대기열 조회.
 - `app/repositories/production_queue_repository.py`, `app/controllers/approval_controller.py` (수정)
 - `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
 - `tests/test_production_controller.py` (신규)
+
+## Phase 6: 모니터링
+
+### 요청 받은 작업
+docs/PLAN.md의 Phase 6 항목 구현: 상태별 주문 수(REJECTED 제외) 및 시료별 재고 상태(여유/부족/고갈) 조회.
+
+### 해석
+재고 상태 임계값(여유≥100, 부족 1~99, 고갈 0)은 PoC `DataMonitor-jihoonlee-23020975`에서 사용한 기준을
+그대로 계승함. PRD에는 구체적 수치가 명시되어 있지 않아 PoC 단계에서 검증된 기준을 재사용하는 것이
+일관성 있다고 판단함.
+
+### 변경 요약
+- `app/controllers/monitoring_controller.py`: 상태별 주문 집계(REJECTED 제외), 재고 상태 분류
+- `app/views/console_view.py`, `main_controller.py`: 모니터링 메뉴("4") 연결
+
+### TDD 사이클 기록
+- RED: `monitoring_controller` 모듈 부재로 collection error 확인
+- GREEN: 구현 후 3개 테스트 PASS
+- REVIEW: Verify Harness 실행 - Test Verify 29/29 PASS. 콘솔에서 주문량/재고량 조회 화면 직접 확인.
+  사용자 검토 결과 재고 임계값/집계 방식 수정 없이 그대로 승인됨.
+
+### 요청사항 충족 여부 체크리스트
+- [x] 상태별 주문 수 조회 (REJECTED 제외)
+- [x] 시료별 재고 상태(여유/부족/고갈) 조회
+- [x] Verify Harness(pytest 29/29 + Compliance 체크) 통과, 콘솔 E2E 검증 완료, 사용자 승인 완료
+
+### 변경된 파일 목록
+- `app/controllers/monitoring_controller.py` (신규)
+- `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
+- `tests/test_monitoring_controller.py` (신규)
