@@ -1,11 +1,8 @@
 from app.controllers.sample_controller import SampleController
+from app.controllers.errors import InvalidOrderStateError
 from app.repositories.order_repository import OrderRepository
 from app.repositories.production_queue_repository import ProductionQueueRepository
 from app.models.order import OrderStatus
-
-
-class InvalidOrderStateError(Exception):
-    """RESERVED가 아닌 주문에 승인/거절을 시도할 때 발생한다."""
 
 
 class ApprovalController:
