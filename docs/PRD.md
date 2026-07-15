@@ -38,7 +38,7 @@
 - [주문 승인/거절](FEATURES/approval.md)
 - [모니터링](FEATURES/monitoring.md)
 - [생산 라인](FEATURES/production_line.md)
-- [출고 처리](FEATURES/release.md) (Phase 7 설계 검토 중)
+- [출고 처리](FEATURES/release.md)
 
 ### 1. 시료 관리
 - 시료 등록: 시료 ID, 이름, 평균 생산시간, 수율을 입력받아 새 시료 등록
