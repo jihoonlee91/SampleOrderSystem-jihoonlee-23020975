@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-이 파일은 Claude Code가 이 리포지토리에서 작업할 때 참고하는 규칙을 담는다.
+이 파일은 Claude Code가 이 리포지토리에서 작업할 때 참고하는 지침을 담는다.
+개인과제의 5대 주안점(문서 관리 / Harness / Test / Clean Code / Commit 이력)에 맞춰 정리한다.
 
 ## 기술 스택
 
@@ -16,23 +17,49 @@ python -m pytest tests/  # 전체 테스트 실행
 python scripts/verify.py # Verify Harness (Test Verify -> Compliance Verify)
 ```
 
-## Verify Harness
+## 1. 문서 관리
 
-Phase 4부터 커밋 전 `python scripts/verify.py`를 실행한다.
-1. Test Verify: pytest 전체 스위트 실행, 실패 시 즉시 중단
-2. Compliance Verify: 설계 문서/PLAN 체크리스트/E2E 수동 검증/작업 보고서 작성 여부를 사람이 최종 확인
+- `docs/PRD.md`: 전체 요구사항(거시적, 기술적 내용 없음)
+- `docs/PLAN.md`: Phase별 개발 계획 및 진행 상황(거시적 계획, 체크박스로 진행 추적)
+- `docs/design/phaseN.md` (+ [인덱스](docs/design/README.md)): Phase별 상세 설계 문서(세부 계획).
+  사람이 승인한 원본을 그대로 유지하며, 구현 중 발생한 편차는 문서를 고치지 않고 `docs/REPORT.md`에 기록한다.
+- `docs/FEATURES/*.md`: 기능 단위 상세 명세(입력값/검증 규칙/경계값). PRD의 기능 요구사항 절에서 링크한다.
+- `docs/REPORT.md`: Phase별 AI 작업 보고서(요청/해석/변경 요약/TDD 기록/체크리스트/변경 파일 목록)
+- `README.md`: 실행 방법, 기능 목록, 프로젝트 구조, 문서 링크를 항상 최신 상태로 유지한다.
 
-## 문서 구조
+## 2. Harness 도입
 
-- `docs/PRD.md`: 전체 요구사항 (기술적 내용 없음)
-- `docs/PLAN.md`: Phase별 개발 계획 및 진행 상황 (개발 중에만 참조, 완료된 Phase는 체크 표시)
-- `docs/design/phaseN.md`: Phase별 상세 설계 문서
+Phase 4부터 커밋 전 `python scripts/verify.py`(Verify Harness)를 실행한다.
+1. Test Verify: pytest 전체 스위트 실행, 실패 시 즉시 중단(Compliance Verify로 진행하지 않음)
+2. Compliance Verify: 설계 문서 범위 준수 / PLAN 체크리스트 충족 / E2E 수동 검증 / 작업 보고서 작성 여부를
+   사람이 최종 확인
 
-## 개발 프로세스 원칙
+## 3. Test
 
-- 각 Phase는 독립적으로 실행 가능한 완성 소프트웨어여야 한다. Phase 완료 시마다 직접 실행하여 검증한 뒤 커밋한다.
-- 코드 작성 전 해당 Phase의 설계 문서(`docs/design/phaseN.md`)를 먼저 작성하고 검토를 거친다.
-- 매 Phase 완료 후 AI는 작업 보고서(요청 내용/해석/변경 요약/체크리스트/변경 파일 목록)를 제시하고, 사람이 검토 후 커밋한다.
+- 콘솔 I/O에 의존하지 않는 Controller 메서드 단위로 pytest 작성 (View는 별도 수동 E2E 검증으로 분리)
+- 각 Phase마다 TDD 사이클(RED: 실패 테스트 작성 및 실패 확인 → GREEN: 최소 구현 후 통과 → REVIEW: 리팩토링/체크)을 따른다
+- 회귀(Regression): 새 Phase 작업 후 반드시 전체 테스트 스위트를 재실행하여 기존 기능이 깨지지 않았는지 확인한다
+
+## 4. Clean Code
+
+- Model은 순수 데이터만 가지며 로직을 갖지 않는다.
+- Repository는 CRUD/조회만 담당하고 도메인 규칙(승인 분기, 생산 계산 등)을 갖지 않는다.
+- Controller가 도메인 규칙을 담당하며, View나 Repository의 구체적 구현에 의존하지 않는다.
+- View는 입출력만 담당하고 비즈니스 로직을 포함하지 않는다.
+
+## 5. Commit 이력
+
+- 각 Phase 완료 시 하나의 커밋으로 정리하고, 커밋 메시지에 어떤 Phase/설계 문서를 따랐는지, TDD/Verify 결과를 남긴다.
+- 커밋 메시지 말미에 `Reviewed-by: jihoonlee91`로 사람 검토 완료를 표시한다(코드를 만든 AI가 아니라
+  검토·승인한 사람이 최종 책임을 진다는 원칙을 반영).
+
+## 개발 절차 (Phase 7부터 적용)
+
+1. AI가 `docs/design/phaseN.md` 설계 문서를 작성하여 제시한다.
+2. 사람이 설계 문서를 검토하고, 필요 시 수정을 요청한다(기대치 확보).
+3. 승인된 설계 문서를 기반으로만 TDD(RED→GREEN) 구현을 진행한다.
+4. Verify Harness 통과 후 사람이 콘솔 E2E 검증 및 최종 리뷰.
+5. 작업 보고서(`docs/REPORT.md`) 작성 후 커밋.
 
 ## 도메인 규칙 (변경 가능성 낮은 핵심 규칙만 기록)
 

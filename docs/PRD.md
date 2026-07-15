@@ -30,6 +30,16 @@
 
 ## 기능 요구사항
 
+전체적인 요구사항은 아래에 요약하고, 기능별 세부 명세(입력값/검증 규칙/경계값 등)는
+[`docs/FEATURES/`](FEATURES/) 디렉토리에 기능 단위로 관리한다.
+
+- [시료 관리](FEATURES/sample_management.md)
+- [시료 주문(예약)](FEATURES/order_reservation.md)
+- [주문 승인/거절](FEATURES/approval.md)
+- [모니터링](FEATURES/monitoring.md)
+- [생산 라인](FEATURES/production_line.md)
+- [출고 처리](FEATURES/release.md) (Phase 7 설계 검토 중)
+
 ### 1. 시료 관리
 - 시료 등록: 시료 ID, 이름, 평균 생산시간, 수율을 입력받아 새 시료 등록
 - 시료 조회: 등록된 모든 시료 목록과 현재 재고 수량 표시
