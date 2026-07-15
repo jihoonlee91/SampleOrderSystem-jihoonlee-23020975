@@ -45,3 +45,44 @@ def test_update_and_insert_still_persist_to_disk():
     # 새 인스턴스(프로세스 재시작을 흉내냄)로 다시 읽어도 반영되어 있어야 한다
     reloaded = JsonStore(store.file_path)
     assert reloaded.find_all() == [{"id": "A", "value": 2}]
+
+
+def test_insert_with_flush_false_does_not_write_immediately():
+    """flush=False로 insert하면 캐시만 갱신되고 디스크에는 즉시 반영되지 않는다(배치 처리용)."""
+    store, _ = _store()
+    store.insert({"id": "A", "value": 1}, flush=False)
+
+    reloaded = JsonStore(store.file_path)
+    assert reloaded.find_all() == []  # 아직 디스크에 반영 안 됨
+    assert store.find_all() == [{"id": "A", "value": 1}]  # 캐시에는 반영됨
+
+
+def test_flush_writes_pending_changes_to_disk():
+    """flush=False로 쌓인 변경을 flush()로 한 번에 디스크에 반영할 수 있다."""
+    store, _ = _store()
+    store.insert({"id": "A", "value": 1}, flush=False)
+    store.insert({"id": "B", "value": 2}, flush=False)
+    store.flush()
+
+    reloaded = JsonStore(store.file_path)
+    assert reloaded.find_all() == [{"id": "A", "value": 1}, {"id": "B", "value": 2}]
+
+
+def test_update_and_delete_accept_flush_false():
+    """update/delete도 flush=False를 받아 즉시 쓰기를 미룰 수 있다."""
+    store, _ = _store()
+    store.insert({"id": "A", "value": 1})
+    store.insert({"id": "B", "value": 2})
+
+    store.update("id", "A", {"value": 99}, flush=False)
+    store.delete("id", "B", flush=False)
+
+    reloaded_before_flush = JsonStore(store.file_path)
+    assert reloaded_before_flush.find_all() == [
+        {"id": "A", "value": 1},
+        {"id": "B", "value": 2},
+    ]
+
+    store.flush()
+    reloaded_after_flush = JsonStore(store.file_path)
+    assert reloaded_after_flush.find_all() == [{"id": "A", "value": 99}]

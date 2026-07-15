@@ -15,6 +15,7 @@
 | 8 | - | 통합 마감 (설계 문서 없이 전체 회귀/정리로 진행) | 완료 |
 | 9 | [phase9_ui.md](phase9_ui.md) | UI 고도화 (시스템 현황 요약, 재고 잔여율 바, 상태 표기 통일) | 완료 |
 | 10 | [phase10_perf.md](phase10_perf.md) | JsonStore 인메모리 캐싱 (성능 최적화) | 완료 |
+| 11 | [phase11.md](phase11.md) | CI 자동화 / JsonStore 배치 쓰기 / MainController 테스트 보강 | 완료 |
 
 ## 설계 문서 작성 규칙
 

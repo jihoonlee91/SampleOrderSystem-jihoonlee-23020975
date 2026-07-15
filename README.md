@@ -1,5 +1,7 @@
 # 반도체 시료 생산주문관리 시스템
 
+![test](https://github.com/jihoonlee91/SampleOrderSystem-jihoonlee-23020975/actions/workflows/test.yml/badge.svg)
+
 가상의 반도체 회사 "S-Semi"의 시료(Sample) 생산과 주문을 관리하는 콘솔 애플리케이션이다.
 Agentic Engineering 방법론(문서 관리, Verify Harness, TDD, Clean Code, Commit 이력)을 적용하여 개발했다.
 
@@ -35,9 +37,14 @@ python main.py
 ## 테스트 / 검증
 
 ```
-python -m pytest tests/     # 전체 단위 테스트 실행
+python -m pytest tests/     # 전체 단위 테스트 실행 (90개)
 python scripts/verify.py    # Verify Harness (Test Verify -> Compliance Verify)
 ```
+
+- `.github/workflows/test.yml`: push/PR 시 GitHub Actions에서 pytest를 자동 실행한다(로컬 Verify
+  Harness를 보완하는 원격 안전망).
+- 테스트 커버리지: `app/` 전체 라인 기준 99%(Model/Repository/Controller 100%, View는 순수 출력
+  포맷팅 헬퍼만 유닛 테스트하고 나머지는 의도적으로 수동 E2E로 검증).
 
 ## 주요 기능
 
