@@ -63,6 +63,34 @@ def test_register_with_negative_stock_raises_error():
         controller.register("S-A", "A", 0.5, 0.9, -100)
 
 
+def test_register_with_empty_sample_id_raises_error():
+    controller = _controller()
+
+    with pytest.raises(InvalidSampleDataError):
+        controller.register("", "이름있음", 0.5, 0.9, 10)
+
+
+def test_register_with_whitespace_only_sample_id_raises_error():
+    controller = _controller()
+
+    with pytest.raises(InvalidSampleDataError):
+        controller.register("   ", "이름있음", 0.5, 0.9, 10)
+
+
+def test_register_with_empty_name_raises_error():
+    controller = _controller()
+
+    with pytest.raises(InvalidSampleDataError):
+        controller.register("S-EMPTY", "", 0.5, 0.9, 10)
+
+
+def test_register_with_whitespace_only_name_raises_error():
+    controller = _controller()
+
+    with pytest.raises(InvalidSampleDataError):
+        controller.register("S-WS", "   ", 0.5, 0.9, 10)
+
+
 def test_register_with_valid_boundary_values_succeeds():
     """경계값(yield_rate=1, stock=0)은 정상 등록되어야 한다 (과도한 제약 금지)."""
     controller = _controller()

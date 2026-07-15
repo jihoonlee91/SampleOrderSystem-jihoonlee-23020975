@@ -1,3 +1,33 @@
+import unicodedata
+
+
+def _char_width(ch: str) -> int:
+    return 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+
+
+def display_width(text: str) -> int:
+    """터미널에서 실제로 차지하는 표시 너비를 계산한다 (한글/전각 문자는 2칸)."""
+    return sum(_char_width(ch) for ch in text)
+
+
+def visual_ljust(text: str, width: int) -> str:
+    """len() 대신 표시 너비 기준으로 왼쪽 정렬 패딩한다 (한글 포함 표 정렬용)."""
+    pad = max(0, width - display_width(text))
+    return text + " " * pad
+
+
+def join_columns(*columns: tuple[str, int]) -> str:
+    """(텍스트, 목표폭) 쌍들을 이어붙이되, 텍스트가 목표폭을 넘어가도 다음 컬럼과
+    최소 1칸은 항상 띄운다 (컬럼 충돌 방지)."""
+    parts = []
+    for text, width in columns:
+        if display_width(text) >= width:
+            parts.append(text + " ")
+        else:
+            parts.append(visual_ljust(text, width))
+    return "".join(parts)
+
+
 def summarize_dashboard(samples: list[dict], orders: list[dict], queue: list[dict]) -> dict:
     """메인 메뉴 상단에 표시할 시스템 현황 요약을 계산한다 (순수 함수, 단위 테스트 가능)."""
     return {
@@ -51,17 +81,20 @@ class ConsoleView:
     def show_order_counts(self, counts: dict) -> None:
         print("[상태별 주문 현황] (REJECTED 제외)")
         for status, count in counts.items():
-            print(f"  {status:<12}{count}건")
+            print(f"  {visual_ljust(status, 12)}{count}건")
 
     def show_stock_status(self, statuses: list[dict]) -> None:
         if not statuses:
             print("등록된 시료가 없습니다.")
             return
-        print(f"{'ID':<8}{'이름':<20}{'재고':<8}{'상태':<6}{'잔여율'}")
+        print(join_columns(("ID", 8), ("이름", 22), ("재고", 8), ("상태", 8)) + "잔여율")
         for s in statuses:
             print(
-                f"{s['sample_id']:<8}{s['name']:<20}{s['stock']:<8}{s['status']:<6}"
-                f"{stock_bar(s['stock'])}"
+                join_columns(
+                    (s["sample_id"], 8), (s["name"], 22),
+                    (str(s["stock"]), 8), (s["status"], 8),
+                )
+                + stock_bar(s["stock"])
             )
 
     def show_production_menu(self) -> None:
@@ -73,11 +106,14 @@ class ConsoleView:
         if not queue:
             print("생산 대기 중인 항목이 없습니다.")
             return
-        print(f"{'순서':<6}{'주문번호':<14}{'시료ID':<8}{'부족분':<8}{'주문수량'}")
+        print(join_columns(("순서", 6), ("주문번호", 16), ("시료ID", 8), ("부족분", 8)) + "주문수량")
         for i, entry in enumerate(queue, start=1):
             print(
-                f"{i:<6}{entry['order_id']:<14}{entry['sample_id']:<8}"
-                f"{entry['shortage']:<8}{entry['quantity']}"
+                join_columns(
+                    (str(i), 6), (entry["order_id"], 16),
+                    (entry["sample_id"], 8), (str(entry["shortage"]), 8),
+                )
+                + str(entry["quantity"])
             )
 
     def show_release_menu(self) -> None:
@@ -102,20 +138,26 @@ class ConsoleView:
         if not orders:
             print("등록된 주문이 없습니다.")
             return
-        print(f"{'주문번호':<14}{'시료ID':<8}{'고객명':<16}{'수량':<8}{'상태'}")
+        print(join_columns(("주문번호", 16), ("시료ID", 8), ("고객명", 20), ("수량", 8)) + "상태")
         for o in orders:
             print(
-                f"{o['order_id']:<14}{o['sample_id']:<8}"
-                f"{o['customer']:<16}{o['quantity']:<8}[{o['status']}]"
+                join_columns(
+                    (o["order_id"], 16), (o["sample_id"], 8),
+                    (o["customer"], 20), (str(o["quantity"]), 8),
+                )
+                + f"[{o['status']}]"
             )
 
     def show_samples(self, samples: list[dict]) -> None:
         if not samples:
             print("등록된 시료가 없습니다.")
             return
-        print(f"{'ID':<8}{'이름':<20}{'평균생산시간':<14}{'수율':<8}{'재고':<8}")
+        print(join_columns(("ID", 8), ("이름", 22), ("평균생산시간", 14), ("수율", 8)) + "재고")
         for s in samples:
             print(
-                f"{s['sample_id']:<8}{s['name']:<20}"
-                f"{s['avg_process_time']:<14}{s['yield_rate']:<8}{s['stock']:<8}"
+                join_columns(
+                    (s["sample_id"], 8), (s["name"], 22),
+                    (str(s["avg_process_time"]), 14), (str(s["yield_rate"]), 8),
+                )
+                + str(s["stock"])
             )

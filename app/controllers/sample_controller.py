@@ -17,13 +17,18 @@ class SampleController:
 
     def register(self, sample_id: str, name: str, avg_process_time: float,
                  yield_rate: float, stock: int = 0) -> dict:
+        self._validate(sample_id, name, avg_process_time, yield_rate, stock)
         if self.repository.read(sample_id) is not None:
             raise DuplicateSampleError(f"이미 존재하는 시료 ID입니다: {sample_id}")
-        self._validate(avg_process_time, yield_rate, stock)
         return self.repository.create(sample_id, name, avg_process_time, yield_rate, stock)
 
     @staticmethod
-    def _validate(avg_process_time: float, yield_rate: float, stock: int) -> None:
+    def _validate(sample_id: str, name: str, avg_process_time: float,
+                  yield_rate: float, stock: int) -> None:
+        if not sample_id.strip():
+            raise InvalidSampleDataError("시료 ID는 빈 값일 수 없습니다.")
+        if not name.strip():
+            raise InvalidSampleDataError("시료명은 빈 값일 수 없습니다.")
         if not (0 < yield_rate <= 1):
             raise InvalidSampleDataError("수율(yield_rate)은 0보다 크고 1 이하여야 합니다.")
         if avg_process_time <= 0:
