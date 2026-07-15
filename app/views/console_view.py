@@ -1,10 +1,35 @@
+def summarize_dashboard(samples: list[dict], orders: list[dict], queue: list[dict]) -> dict:
+    """메인 메뉴 상단에 표시할 시스템 현황 요약을 계산한다 (순수 함수, 단위 테스트 가능)."""
+    return {
+        "sample_count": len(samples),
+        "total_stock": sum(s["stock"] for s in samples),
+        "order_count": len(orders),
+        "queue_count": len(queue),
+    }
+
+
+def stock_bar(stock: int, capacity: int = 200, width: int = 10) -> str:
+    """재고 잔여율을 텍스트 막대로 표현한다 (순수 함수, 단위 테스트 가능)."""
+    ratio = min(1.0, stock / capacity) if capacity > 0 else 0.0
+    filled = round(ratio * width)
+    bar = "#" * filled + "." * (width - filled)
+    percent = round(ratio * 100)
+    return f"[{bar}] {percent}%"
+
+
 class ConsoleView:
     """모든 콘솔 입출력을 전담한다. 비즈니스 로직을 갖지 않는다."""
 
-    def show_main_menu(self) -> None:
+    def show_main_menu(self, summary: dict) -> None:
         print("=" * 60)
         print(" 반도체 시료 생산주문관리 시스템")
         print("=" * 60)
+        print(
+            f" 시스템 현황  등록 시료 {summary['sample_count']}종  "
+            f"총 재고 {summary['total_stock']}ea  전체 주문 {summary['order_count']}건  "
+            f"생산라인 {summary['queue_count']}건 대기"
+        )
+        print("-" * 60)
         print("[1] 시료 관리   [2] 시료 주문   [3] 주문 승인/거절")
         print("[4] 모니터링    [5] 생산 라인   [6] 출고 처리   [0] 종료")
 
@@ -32,9 +57,12 @@ class ConsoleView:
         if not statuses:
             print("등록된 시료가 없습니다.")
             return
-        print(f"{'ID':<8}{'이름':<20}{'재고':<8}{'상태'}")
+        print(f"{'ID':<8}{'이름':<20}{'재고':<8}{'상태':<6}{'잔여율'}")
         for s in statuses:
-            print(f"{s['sample_id']:<8}{s['name']:<20}{s['stock']:<8}{s['status']}")
+            print(
+                f"{s['sample_id']:<8}{s['name']:<20}{s['stock']:<8}{s['status']:<6}"
+                f"{stock_bar(s['stock'])}"
+            )
 
     def show_production_menu(self) -> None:
         print("-" * 60)
@@ -78,7 +106,7 @@ class ConsoleView:
         for o in orders:
             print(
                 f"{o['order_id']:<14}{o['sample_id']:<8}"
-                f"{o['customer']:<16}{o['quantity']:<8}{o['status']}"
+                f"{o['customer']:<16}{o['quantity']:<8}[{o['status']}]"
             )
 
     def show_samples(self, samples: list[dict]) -> None:

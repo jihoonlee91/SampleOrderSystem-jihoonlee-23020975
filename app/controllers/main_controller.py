@@ -1,4 +1,4 @@
-from app.views.console_view import ConsoleView
+from app.views.console_view import ConsoleView, summarize_dashboard
 from app.controllers.sample_controller import (
     SampleController,
     DuplicateSampleError,
@@ -47,7 +47,12 @@ class MainController:
             "6": self._release_menu,
         }
         while True:
-            self.view.show_main_menu()
+            summary = summarize_dashboard(
+                self.sample_controller.list_all(),
+                self.order_controller.list_all(),
+                self.production_controller.list_queue(),
+            )
+            self.view.show_main_menu(summary)
             choice = self.view.prompt("선택")
             if choice == "0":
                 self.view.show_message("종료합니다.")
