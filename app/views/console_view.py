@@ -52,6 +52,11 @@ class ConsoleView:
                 f"{entry['shortage']:<8}{entry['quantity']}"
             )
 
+    def show_release_menu(self) -> None:
+        print("-" * 60)
+        print(" [출고 처리]")
+        print("[1] 출고 실행   [0] 뒤로")
+
     def show_production_result(self, result: dict) -> None:
         print(
             f"생산 완료 - 주문 {result['order_id']} / 시료 {result['sample_id']} / "

@@ -202,3 +202,39 @@ docs/PLAN.md의 Phase 6 항목 구현: 상태별 주문 수(REJECTED 제외) 및
 - `app/controllers/monitoring_controller.py` (신규)
 - `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
 - `tests/test_monitoring_controller.py` (신규)
+
+## Phase 7: 출고 처리
+
+### 요청 받은 작업
+docs/PLAN.md의 Phase 7 항목 구현: CONFIRMED 주문 목록 표시 및 출고 실행(RELEASE 전환).
+
+### 사람 검토 사항 (설계 단계에서 확인받음)
+설계 문서(docs/design/phase7.md) 작성 시 2가지를 사전에 질의하여 승인받음:
+1. `InvalidOrderStateError`를 `app/controllers/errors.py` 공통 모듈로 분리 (승인됨, 별도 리팩토링 커밋으로 선행 처리)
+2. 출고 메뉴 번호는 기존 "6번" 유지 (승인됨)
+
+### 변경 요약
+- `app/controllers/errors.py`: `InvalidOrderStateError` 공통 모듈 (선행 리팩토링 커밋)
+- `app/controllers/approval_controller.py`: 공통 예외 모듈 참조로 수정 (선행 리팩토링 커밋)
+- `app/controllers/release_controller.py`: CONFIRMED 조회/출고 실행
+- `app/views/console_view.py`, `main_controller.py`: "6. 출고 처리" 메뉴 연결
+
+### TDD 사이클 기록
+- (선행) 리팩토링: errors.py 분리 후 회귀 테스트 29/29 PASS 확인, 별도 커밋
+- RED: `release_controller` 모듈 부재로 collection error 확인
+- GREEN: `ReleaseController` 구현 후 4개 테스트 PASS
+- REVIEW: Verify Harness 실행 - Test Verify 33/33 PASS. 콘솔에서 승인→출고 흐름 E2E 검증 완료.
+
+### 요청사항 충족 여부 체크리스트
+- [x] CONFIRMED 주문만 출고 대상 목록에 노출
+- [x] 출고 실행 시 RELEASE로 전환
+- [x] CONFIRMED가 아닌 주문(중복 출고 포함) 출고 시도 시 오류 처리
+- [x] Verify Harness(pytest 33/33 + Compliance 체크) 통과, 콘솔 E2E 검증 완료
+- [x] 설계 문서 사전 승인 절차 준수(errors.py 분리, 메뉴 번호 확정)
+
+### 변경된 파일 목록
+- `app/controllers/errors.py` (신규)
+- `app/controllers/approval_controller.py` (수정 - import 경로 변경)
+- `app/controllers/release_controller.py` (신규)
+- `app/views/console_view.py`, `app/controllers/main_controller.py` (수정)
+- `tests/test_release_controller.py` (신규)

@@ -5,9 +5,11 @@ from app.controllers.order_controller import (
     SampleNotFoundError,
     InvalidQuantityError,
 )
-from app.controllers.approval_controller import ApprovalController, InvalidOrderStateError
+from app.controllers.approval_controller import ApprovalController
 from app.controllers.production_controller import ProductionController
 from app.controllers.monitoring_controller import MonitoringController
+from app.controllers.release_controller import ReleaseController
+from app.controllers.errors import InvalidOrderStateError
 from app.repositories.sample_repository import SampleRepository
 from app.repositories.order_repository import OrderRepository
 from app.repositories.production_queue_repository import ProductionQueueRepository
@@ -29,6 +31,7 @@ class MainController:
             queue_repository, order_repository, self.sample_controller
         )
         self.monitoring_controller = MonitoringController(order_repository, self.sample_controller)
+        self.release_controller = ReleaseController(order_repository)
 
     def run(self) -> None:
         actions = {
@@ -37,6 +40,7 @@ class MainController:
             "3": self._approval_menu,
             "4": self._monitoring_menu,
             "5": self._production_menu,
+            "6": self._release_menu,
         }
         while True:
             self.view.show_main_menu()
@@ -126,6 +130,24 @@ class MainController:
                 self.view.show_order_counts(self.monitoring_controller.order_counts())
             elif choice == "2":
                 self.view.show_stock_status(self.monitoring_controller.stock_status())
+            else:
+                self.view.show_message("잘못된 선택입니다.")
+
+    def _release_menu(self) -> None:
+        while True:
+            self.view.show_release_menu()
+            confirmed = self.release_controller.list_confirmed()
+            self.view.show_orders(confirmed)
+            choice = self.view.prompt("선택")
+            if choice == "0":
+                return
+            elif choice == "1":
+                order_id = self.view.prompt("주문번호")
+                try:
+                    order = self.release_controller.release(order_id)
+                    self.view.show_message(f"출고 완료. 상태: {order['status']}")
+                except InvalidOrderStateError as e:
+                    self.view.show_message(str(e))
             else:
                 self.view.show_message("잘못된 선택입니다.")
 
