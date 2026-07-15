@@ -27,6 +27,11 @@ class ApprovalController:
             self.order_repository.update_status(order_id, OrderStatus.CONFIRMED.value)
         else:
             shortage = quantity - sample["stock"]
+            # 현재 재고 전량을 이 주문에 즉시 소진 처리한다. 그래야 같은 시료에 대해
+            # 재고 부족 상태로 대기 중인 다른 주문이 이미 소진된 재고를 중복으로
+            # 계산하지 않는다(동시 승인 시 재고 이중 계산 방지).
+            if sample["stock"] > 0:
+                self.sample_controller.repository.adjust_stock(order["sample_id"], -sample["stock"])
             self.queue_repository.enqueue(order_id, order["sample_id"], shortage, quantity)
             self.order_repository.update_status(order_id, OrderStatus.PRODUCING.value)
 

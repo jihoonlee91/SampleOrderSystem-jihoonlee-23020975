@@ -28,10 +28,11 @@ class ProductionController:
         actual_quantity = math.ceil(shortage / sample["yield_rate"])
         total_time = sample["avg_process_time"] * actual_quantity
 
-        # 생산된 만큼 재고에 더하고, 주문 수량 전체를 출고 대기로 확정(소진)한다.
-        # 순증감 = 실 생산량 - 주문 수량 (기존 재고 중 이미 확보된 부분 + 신규 생산분 - 주문 소진량)
+        # 승인 시점에 이미 기존 재고 전량이 이 주문에 소진 처리되었으므로(ApprovalController),
+        # 생산 완료 시에는 "부족분을 정확히 채우고 남는 만큼"만 재고에 반영하면 된다.
+        # 순증감 = 실 생산량 - 부족분 (반올림으로 인한 잉여만 재고로 편입)
         self.sample_controller.repository.adjust_stock(
-            entry["sample_id"], actual_quantity - entry["quantity"]
+            entry["sample_id"], actual_quantity - shortage
         )
         self.order_repository.update_status(entry["order_id"], OrderStatus.CONFIRMED.value)
 

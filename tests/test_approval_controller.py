@@ -45,8 +45,10 @@ def test_approve_with_insufficient_stock_enqueues_and_sets_producing():
 
     updated_order = order_controller.repository.read(order["order_id"])
     assert updated_order["status"] == OrderStatus.PRODUCING.value
-    # 재고 부족 시에는 아직 재고를 차감하지 않는다 (생산 완료 후 Phase 5에서 처리)
-    assert sample_controller.get("S-003")["stock"] == 30
+    # 재고 부족 시 기존 재고 전량을 이 주문에 즉시 소진 처리한다(0이 됨).
+    # 그래야 같은 시료의 다른 대기 주문이 이미 소진된 재고를 중복 계산하지 않는다
+    # (동시 승인 시 재고 이중 계산 버그 수정, tests/test_production_concurrency.py 참고).
+    assert sample_controller.get("S-003")["stock"] == 0
 
     queue_entries = approval_controller.queue_repository.find_all()
     assert len(queue_entries) == 1
